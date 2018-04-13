@@ -74,4 +74,4 @@ if __name__ == '__main__':
             time.sleep(5)
         else:
             logging.debug("All tasks completed")
-            exit(0)
+            break
