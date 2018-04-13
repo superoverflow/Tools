@@ -1,0 +1,1 @@
+simple script for executing commands over the grids
