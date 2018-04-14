@@ -17,11 +17,13 @@ class ProducerThread(Thread):
     def run(self):
         logging.debug("starting producer thread")
         while True:
-            for q in self.queues:
-                if not q.full() and len(self.tasks) > 0:
-                    t = self.tasks.pop()
-                    q.put(t)
+            self.assign_task_to_agent()
 
+    def assign_task_to_agent(self):
+        for q in self.queues:
+            if not q.full() and len(self.tasks) > 0:
+                t = self.tasks.pop()
+                q.put(t)
 
 
 class ConsumerThread(Thread):
@@ -37,16 +39,16 @@ class ConsumerThread(Thread):
         while True:
             task = self.queue.get()
             logging.debug("[%s]: start [%s: %s]" % (self.name, self.machine, task))
-            result = do_task(self.machine, task)
+            result = self.do_task(self.machine, task)
             logging.debug("[%s]: end [%s: %s]/%d" % (self.name, self.machine, task, result))
             self.queue.task_done()
 
+    def do_task(machine, task):
+        cmd = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes %s %s" % (machine, task)
+        cmd = task
+        result = subprocess.call(cmd, shell=True)
+        return result
 
-def do_task(machine, task):
-    cmd = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes %s %s" % (machine, task)
-    cmd = task
-    result = subprocess.call(cmd, shell=True)
-    return result
 
 if __name__ == '__main__':
     FORMAT = "%(asctime)-15s [%(levelname)-6s] %(filename)s:%(lineno)3d  %(message)s"
