@@ -33,7 +33,7 @@ class ConsumerThread(Thread):
         self.setDaemon(True)
 
     def run(self):
-        logging.debug("starting consumer thread on %s", self.name)
+        logging.debug("starting consumer thread on %s", self.machine)
         while True:
             task = self.queue.get()
             logging.debug("[%s]: start [%s: %s]" % (self.name, self.machine, task))
@@ -73,5 +73,7 @@ if __name__ == '__main__':
         if n > 0:
             time.sleep(5)
         else:
-            logging.debug("All tasks completed")
+            # TODO: handle edge case that the last task takes long
+            logging.debug("All tasks completed..")
             break
+
