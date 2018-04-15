@@ -39,13 +39,14 @@ class ConsumerThread(Thread):
         while True:
             task = self.queue.get()
             logging.debug("[%s]: start [%s: %s]" % (self.name, self.machine, task))
-            result = self.do_task(self.machine, task)
+            result = self.do_task(task)
             logging.debug("[%s]: end [%s: %s]/%d" % (self.name, self.machine, task, result))
             self.queue.task_done()
 
-    def do_task(machine, task):
-        cmd = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes %s %s" % (machine, task)
-        cmd = task
+    def do_task(self, task):
+        cmd = "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes %s %s" % \
+              (self.machine, task)
+        logging.debug("[%s]: exec [%s]" % ( self.machine, cmd))
         result = subprocess.call(cmd, shell=True)
         return result
 
@@ -69,6 +70,8 @@ if __name__ == '__main__':
     p = ProducerThread("producer", tasks, queues)
     p.start()
 
+    # TODO: refactoring this to a monitoring thread
+    # TODO: wait until the task is in execution state
     while True:
         n = len(tasks)
         logging.debug("remaining task: %d" % n)
